@@ -7,34 +7,25 @@
 using namespace std;
 
 void removeEmptyFiles(std::list<shared_ptr<FileReader>>& files) {
-   //How do you remove more than one file at a time? My solution was keep removing one elemnt until
-   // we iterated through without modifying.
-   bool EmptyFiles = true;
-   while(EmptyFiles==true){
-      EmptyFiles = false;
-      for (auto ele = files.begin(); ele != files.end(); ele++) {
-         /*if (!((*ele)->currentline().has_value())) {*/
-         if (!((*ele)->validFile())) {
-            EmptyFiles = true;
-            ele = files.erase(ele);
-            break;
-         }
-      }
-   }
-
+   files.remove_if([](shared_ptr<FileReader> ele) {return !(*ele).validFile(); });
 }
 
 std::string minimumLineFromFile(std::list<shared_ptr<FileReader>>& files) {
+
+   string rtrnstring{};
    shared_ptr<FileReader> minLineFile = files.front();
+
+   //Find smallest of the current lines
    for (auto ele : files) {
       if (std::stoi(ele->currentline().value()) < std::stoi(minLineFile->currentline().value())) {
          minLineFile = ele;
       }
    }
-   string rtrnstring = minLineFile->currentline().value();
+
+   //Store smallest line, advance file of smallest line, remove any empty collections, return
+   rtrnstring = minLineFile->currentline().value();
    minLineFile->nextline();
    removeEmptyFiles(files);
-
    return rtrnstring;
 }
 
@@ -51,7 +42,6 @@ int main() {
 
    std::ofstream masterfile;
    masterfile.open("masterLog.txt");
-
    removeEmptyFiles(files);
    while (!files.empty()) {
       masterfile << minimumLineFromFile(files) << endl;
